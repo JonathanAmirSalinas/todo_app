@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/pages/home_page.dart';
+import 'package:todo_app/pages/manage_page.dart';
+import 'package:todo_app/pages/saved_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,36 +14,50 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'ToDo App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'ToDo App'),
+      home: const MainPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MainPageState extends State<MainPage> {
+  int index = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
+      body: IndexedStack(
+        index: index,
+        children: const [
+          HomePage(),
+          SavedPage(),
+          ManagePage(),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: index,
+        backgroundColor: Theme.of(context).primaryColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white60,
+        onTap: (value) => setState(() {
+          index = value;
+        }),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Main"),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Saved"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.manage_accounts), label: "Manage"),
+        ],
       ),
     );
   }
