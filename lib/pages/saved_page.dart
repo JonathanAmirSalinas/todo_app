@@ -14,7 +14,7 @@ class _SavedPageState extends State<SavedPage> {
       appBar: AppBar(
         title: const Text("Saved Page"),
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: SingleChildScrollView(child: Column()),
       ),
     );

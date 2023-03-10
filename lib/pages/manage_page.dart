@@ -14,7 +14,7 @@ class _ManagePageState extends State<ManagePage> {
       appBar: AppBar(
         title: const Text("Manage Page"),
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: SingleChildScrollView(child: Column()),
       ),
     );
