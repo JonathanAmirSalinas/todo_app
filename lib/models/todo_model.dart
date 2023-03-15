@@ -3,13 +3,13 @@ class Todo {
   final int? id;
   final String title;
   final String body;
-  //final DateTime timestamp;
+  final String date;
 
   Todo({
     this.id,
     required this.title,
     required this.body,
-    //required this.timestamp,
+    required this.date,
   });
 
   Map<String, dynamic> toJson() {
@@ -17,7 +17,7 @@ class Todo {
       'id': id,
       'title': title,
       'body': body,
-      //'timestamp': timestamp,
+      'date': date,
     };
   }
 
@@ -26,7 +26,7 @@ class Todo {
       id: json['id'],
       title: json['title'],
       body: json['body'],
-      //timestamp: json['timestamp']
+      date: json['date'],
     );
   }
 }

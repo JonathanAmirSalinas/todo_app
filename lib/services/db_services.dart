@@ -10,18 +10,18 @@ class DBServices {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) {
       return db.execute(
-          'Create Table Todo(id INTERGER PRIMARY KEY , title TEXT NOT NULL, body TEXT NOT NULL,);');
+          'Create Table Todo(id INTERGER PRIMARY KEY , title TEXT NOT NULL, body TEXT NOT NULL, date TEXT NOT NULL);');
     }, version: _dbVersion);
   }
 
-  static Future<void> add(Todo todo) async {
+  static Future<void> addTodo(Todo todo) async {
     final db = await _getdb();
 
     await db.insert('Todo', todo.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<int> update(Todo todo) async {
+  static Future<int> updateTodo(Todo todo) async {
     final db = await _getdb();
 
     return await db.update('Todo', todo.toJson(),
@@ -30,7 +30,7 @@ class DBServices {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<int> delete(Todo todo) async {
+  static Future<int> deleteTodo(Todo todo) async {
     final db = await _getdb();
 
     return await db.delete(
@@ -51,5 +51,11 @@ class DBServices {
       return List.generate(
           todos.length, (index) => Todo.fromJson(todos[index]));
     }
+  }
+
+  static Future<void> deleteDB() async {
+    final db = await _getdb();
+
+    await db.execute('DROP TABLE IF EXISTS Todo');
   }
 }

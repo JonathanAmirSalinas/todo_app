@@ -13,6 +13,8 @@ class CreateTodoPage extends StatefulWidget {
 class _CreateTodoPageState extends State<CreateTodoPage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController bodyController = TextEditingController();
+  String date =
+      '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}';
 
   @override
   void dispose() {
@@ -98,6 +100,7 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
                 todoProvider.addTodo(Todo(
                   title: titleController.text,
                   body: bodyController.text,
+                  date: date,
                 ));
                 Navigator.of(context).pop();
               },

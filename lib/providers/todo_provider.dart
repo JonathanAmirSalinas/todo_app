@@ -4,7 +4,6 @@ import 'package:todo_app/services/db_services.dart';
 
 class TodoProvider extends ChangeNotifier {
   List<Todo> _todo = [];
-  String time = DateTime.now().toString();
 
   List<Todo> get getTodoList => _todo;
 
@@ -15,20 +14,20 @@ class TodoProvider extends ChangeNotifier {
 
   // Adds Todo object to the database
   Future<void> addTodo(Todo todo) async {
-    await DBServices.add(todo);
+    await DBServices.addTodo(todo);
     _todo.add(todo);
     notifyListeners();
   }
 
   // Updates Todo object to the database
   Future<void> updateTodo(Todo todo) async {
-    await DBServices.update(todo);
+    await DBServices.updateTodo(todo);
     notifyListeners();
   }
 
   // Deletes Todo object to the database
   Future<void> deleteTodo(Todo todo) async {
-    await DBServices.delete(todo);
+    await DBServices.deleteTodo(todo);
     notifyListeners();
   }
 }
