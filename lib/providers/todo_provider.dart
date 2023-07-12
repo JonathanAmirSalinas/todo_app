@@ -27,7 +27,13 @@ class TodoProvider extends ChangeNotifier {
 
   // Deletes Todo object to the database
   Future<void> deleteTodo(Todo todo) async {
-    await DBServices.deleteTodo(todo);
+    try {
+      await DBServices.deleteTodo(todo);
+      _todo.remove(todo);
+    } on Exception catch (e) {
+      print(e);
+    }
+
     notifyListeners();
   }
 }

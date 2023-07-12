@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/todo_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateTodoPage extends StatefulWidget {
   const CreateTodoPage({super.key});
@@ -98,6 +99,7 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
           floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
                 todoProvider.addTodo(Todo(
+                  id: const Uuid().v1(),
                   title: titleController.text,
                   body: bodyController.text,
                   date: date,

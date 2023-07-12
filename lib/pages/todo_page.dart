@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 
 class TodoPage extends StatefulWidget {
-  int index;
-  TodoPage({
+  final int index;
+  const TodoPage({
     Key? key,
     required this.index,
   }) : super(key: key);

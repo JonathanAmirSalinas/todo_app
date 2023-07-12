@@ -10,7 +10,7 @@ class DBServices {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) {
       return db.execute(
-          'Create Table Todo(id INTERGER PRIMARY KEY , title TEXT NOT NULL, body TEXT NOT NULL, date TEXT NOT NULL);');
+          'Create Table Todo(id TEXT NOT NULL , title TEXT NOT NULL, body TEXT NOT NULL, date TEXT NOT NULL);');
     }, version: _dbVersion);
   }
 

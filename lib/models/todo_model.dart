@@ -1,12 +1,12 @@
 // ToDo Object
 class Todo {
-  final int? id;
+  final String id;
   final String title;
   final String body;
   final String date;
 
   Todo({
-    this.id,
+    required this.id,
     required this.title,
     required this.body,
     required this.date,
