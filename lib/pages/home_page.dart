@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/models/todo_model.dart';
+import 'package:time/time.dart';
 import 'package:todo_app/providers/todo_provider.dart';
-import 'package:todo_app/widgets/main_drawer_widget.dart';
-import 'package:uuid/uuid.dart';
+import 'package:todo_app/widgets/crud_widgets.dart';
+import 'package:todo_app/services/db_services.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,12 +17,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  String date =
-      '${DateTime.now().month}/${DateTime.now().day}/${DateTime.now().year}';
-
-  bool cbValue = false;
   late bool isLoading;
-  int index = 0;
+  List color = [
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.pink,
+    Colors.teal,
+  ];
 
   @override
   void initState() {
@@ -35,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     });
     try {
       TodoProvider todoProvider = Provider.of(context, listen: false);
-      await todoProvider.getTodos();
+      await todoProvider.getTodos(); // Calls data from database
     } catch (e) {
       print(e);
     }
@@ -44,115 +50,10 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // Shows Bottom Sheet
-  void _addTodo(BuildContext context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          TodoProvider todoProvider = Provider.of(context);
-          return FractionallySizedBox(
-            heightFactor: 1.5,
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    color: Colors.white),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: Text(
-                        'Add New Todo',
-                        style: TextStyle(
-                            fontSize: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .fontSize),
-                      ),
-                    ),
-                    const Divider(
-                      thickness: 4,
-                      color: Colors.blue,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Container(
-                        height: 40,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.all(8),
-                        alignment: Alignment.centerLeft,
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(4)),
-                        ),
-                        child: TextField(
-                          key: const Key('add-title'),
-                          controller: titleController,
-                          autofocus: true,
-                          decoration: const InputDecoration.collapsed(
-                              hintText: 'Title'),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 120,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      padding: const EdgeInsets.all(8),
-                      alignment: Alignment.topLeft,
-                      decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(4)),
-                          color: Theme.of(context).cardColor),
-                      child: TextField(
-                        key: const Key('add-description'),
-                        controller: descriptionController,
-                        maxLines: 4,
-                        decoration: const InputDecoration.collapsed(
-                            hintText: 'Description'),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.all(4),
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        key: const Key('add-todo'),
-                        onPressed: () {
-                          // Adds Todo to Database
-                          todoProvider.addTodo(Todo(
-                            id: const Uuid().v1(),
-                            title: titleController.text,
-                            body: descriptionController.text,
-                            date: date,
-                          ));
-                          // Clears Submitted Textfield Data
-                          titleController.clear();
-                          descriptionController.clear();
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(Icons.add),
-                        label: Text(
-                          'Add Todo',
-                          style: TextStyle(
-                              fontSize: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .fontSize),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          );
-        });
+  @override
+  void dispose() {
+    TodoDatabase.instance.close();
+    super.dispose();
   }
 
   @override
@@ -162,19 +63,9 @@ class _HomePageState extends State<HomePage> {
         ? const CircularProgressIndicator()
         : SafeArea(
             child: Scaffold(
-              drawer: const MainDrawer(),
-              appBar: AppBar(
-                key: const Key('Home Appbar'),
-                title: const Text('Todo'),
-                leading: Builder(builder: (context) {
-                  return IconButton(
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                      icon: const Icon(Icons.menu));
-                }),
-              ),
+              // Conditional UI if Database is Empty
               body: todoProvider.getTodoList.isEmpty
+                  // Without/Empty List
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -184,12 +75,14 @@ class _HomePageState extends State<HomePage> {
                             style: TextStyle(
                                 fontSize: Theme.of(context)
                                     .textTheme
-                                    .titleLarge!
+                                    .headlineSmall!
                                     .fontSize),
                           ),
+                          // Same Functionality as our FloatActionButton
                           TextButton(
                               onPressed: () {
-                                _addTodo(context);
+                                createTodo(context, titleController,
+                                    descriptionController);
                               },
                               child: Text(
                                 'Click here to create your first todo!',
@@ -203,27 +96,42 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     )
-                  : SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: ListView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          // Wont go scroll to very bottom
-                          padding: const EdgeInsets.only(bottom: 100),
-                          itemCount: todoProvider.getTodoList.length,
-                          itemBuilder: (context, index) {
-                            return buildTodoTile(index);
-                          }),
-                    ),
+                  // With Data
+                  : Container(
+                      margin: const EdgeInsets.all(4),
+                      child: GridView.custom(
+                        //reverse: true,
+                        gridDelegate: SliverQuiltedGridDelegate(
+                          crossAxisCount: 4,
+                          mainAxisSpacing: 1,
+                          crossAxisSpacing: 1,
+                          repeatPattern: QuiltedGridRepeatPattern.inverted,
+                          pattern: [
+                            // (x, y) -> Cross, Main
+                            const QuiltedGridTile(3, 2),
+                            const QuiltedGridTile(1, 2),
+                            const QuiltedGridTile(2, 2),
+                            const QuiltedGridTile(2, 2),
+                            const QuiltedGridTile(2, 2),
+                          ],
+                        ),
+                        childrenDelegate: SliverChildBuilderDelegate(
+                          childCount: todoProvider.getTodoList.length,
+                          (context, index) => buildTodoGridTile(index),
+                        ),
+                      )),
               floatingActionButton: SizedBox(
                 height: 50,
                 width: 50,
                 child: FloatingActionButton(
                   onPressed: () {
-                    _addTodo(context);
+                    createTodo(context, titleController, descriptionController);
                   },
+                  backgroundColor: Colors.white,
                   shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  tooltip: "Create Note",
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  tooltip: "Create Todo",
                   child: const Icon(Icons.add),
                 ),
               ),
@@ -231,56 +139,55 @@ class _HomePageState extends State<HomePage> {
           );
   }
 
-  // Builds Todo Card
-  buildTodoTile(int index) {
+  // Todo Tile
+  buildTodoGridTile(int index) {
     TodoProvider todoProvider = Provider.of(context);
-    return Card(
-        child: ExpansionTile(
-      leading: Checkbox(
-        value: cbValue,
-        onChanged: (value) {
-          setState(() {
-            cbValue = value!;
-          });
-        },
-      ),
-      title: Text(
-        todoProvider.getTodoList[index].title,
-        style: TextStyle(
-          fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
-        ),
-      ),
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: const BoxDecoration(border: Border(top: BorderSide())),
-          child: Column(
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context)
+            .pushNamed('/viewtodo', arguments: todoProvider.getTodoList[index]);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(1),
+        decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
+            color: color[index % 7]),
+        child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Todo Tilte
               Text(
-                'Todo:',
+                todoProvider.getTodoList[index].title,
                 style: TextStyle(
-                  color: Colors.black45,
-                  fontStyle: FontStyle.italic,
-                  fontSize: Theme.of(context).textTheme.labelMedium!.fontSize,
+                  fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
+              // Todo Description
+              Expanded(
+                  child: Text(
+                todoProvider.getTodoList[index].description,
+                style: TextStyle(
+                  fontSize: Theme.of(context).textTheme.titleMedium!.fontSize,
+                ),
+                overflow: TextOverflow.fade,
+              )),
+              // Todo Date
+              Container(
+                alignment: Alignment.bottomRight,
                 child: Text(
-                  todoProvider.getTodoList[index].body,
-                  overflow: TextOverflow.visible,
+                  DateFormat('MM-dd-yyyy').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                              todoProvider.getTodoList[index].date)
+                          .date),
                   style: TextStyle(
-                      fontSize:
-                          Theme.of(context).textTheme.titleMedium!.fontSize),
+                    fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ));
+              )
+            ]),
+      ),
+    );
   }
 } ////

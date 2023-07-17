@@ -14,16 +14,15 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-
+  // Initilize Router
   final AppRouter _appRouter = AppRouter();
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ToDo App',
       theme: ThemeData(
+        brightness: Brightness.dark, // Dark Mode
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),

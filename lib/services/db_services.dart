@@ -1,61 +1,89 @@
+import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/models/todo_model.dart';
 
-class DBServices {
-  static const int _dbVersion = 1;
-  static const String _dbName = 'todo.db';
+class TodoDatabase {
+  static final TodoDatabase instance = TodoDatabase._init();
 
-  static Future<Database> _getdb() async {
-    return openDatabase(join(await getDatabasesPath(), _dbName),
-        onCreate: (db, version) {
-      return db.execute(
-          'Create Table Todo(id TEXT NOT NULL , title TEXT NOT NULL, body TEXT NOT NULL, date TEXT NOT NULL);');
-    }, version: _dbVersion);
+  static Database? _database;
+
+  TodoDatabase._init();
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+
+    _database = await _initDB('todos.db');
+    return _database!;
   }
 
-  static Future<void> addTodo(Todo todo) async {
-    final db = await _getdb();
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
 
-    await db.insert('Todo', todo.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  static Future<int> updateTodo(Todo todo) async {
-    final db = await _getdb();
+  Future _createDB(Database db, int version) async {
+    // const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT'; /////// Returns NULL -> Currently replaced with a Uuid (unique id dependency)
+    const stringType = 'TEXT NOT NULL';
+    const intType = 'INTEGER NOT NULL';
 
-    return await db.update('Todo', todo.toJson(),
-        where: 'id = ?',
+    await db.execute('''CREATE TABLE $tableTodo (
+      ${TodoFields.id} $stringType, 
+      ${TodoFields.title} $stringType,
+      ${TodoFields.description} $stringType,
+      ${TodoFields.date} $intType    
+    )
+    ''');
+  }
+
+  // Creates Todo item
+  Future<int> createTodo(Todo todo) async {
+    final db = await instance.database;
+
+    return await db.insert(tableTodo, todo.toJson());
+  }
+
+  // Gets list of Todos
+  Future<List<Todo>> getTodos() async {
+    final db = await instance.database;
+
+    final List<Map<String, dynamic>> todos = await db.query(tableTodo);
+
+    if (todos.isNotEmpty) {
+      return List.generate(
+          todos.length, (index) => Todo.fromJson(todos[index]));
+    } else {
+      throw Exception('Empty Database');
+    }
+  }
+
+  // Update Todo
+  Future<int> updateTodo(Todo todo) async {
+    final db = await instance.database;
+
+    return db.update(tableTodo, todo.toJson(),
+        where: '${TodoFields.id} = ?',
         whereArgs: [todo.id],
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<int> deleteTodo(Todo todo) async {
-    final db = await _getdb();
+  // Delete Todo
+  Future<int> deleteTodo(Todo todo) async {
+    final db = await instance.database;
 
     return await db.delete(
-      'Todo',
-      where: 'id = ?',
+      tableTodo,
+      where: '${TodoFields.id} = ?',
       whereArgs: [todo.id],
     );
   }
 
-  static Future<List<Todo>?> getTodos() async {
-    final db = await _getdb();
+  // Closes database connection
+  Future close() async {
+    final db = await instance.database;
 
-    final List<Map<String, dynamic>> todos = await db.query('Todo');
-
-    if (todos.isEmpty) {
-      return null;
-    } else {
-      return List.generate(
-          todos.length, (index) => Todo.fromJson(todos[index]));
-    }
-  }
-
-  static Future<void> deleteDB() async {
-    final db = await _getdb();
-
-    await db.execute('DROP TABLE IF EXISTS Todo');
+    db.close();
   }
 }

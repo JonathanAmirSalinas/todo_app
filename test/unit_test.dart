@@ -4,9 +4,9 @@ import 'package:todo_app/models/todo_model.dart';
 void main() {
   test("Todo Model", () async {
     final Todo todo =
-        Todo(id: '1', title: "Title", body: "Body", date: "3/13/2023");
+        Todo(id: '1', title: "Title", description: "Body", date: 45454545);
     expect(todo.title, 'Title');
-    expect(todo.body, 'Body');
+    expect(todo.description, 'Body');
     expect(todo.date, '3/13/2023');
   });
   test("Get Todo", () async {});
