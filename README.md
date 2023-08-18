@@ -16,10 +16,10 @@ This project allows a user to take notes. Using sql to save your notes on local 
 
 ### Samples
 Intital
-![Screenshot_1692377831](https://github.com/JonathanAmirSalinas/todo_app/assets/126116839/60b31e52-b165-4a3d-86dd-0663eeae4143)
+![Screenshot_1692377831](https://github.com/JonathanAmirSalinas/todo_app/assets/126116839/60b31e52-b165-4a3d-86dd-0663eeae4143) On Create ![Screenshot_1692377836](https://github.com/JonathanAmirSalinas/todo_app/assets/126116839/545f8b8c-05ca-4dc7-b01f-f87939e803a9)
 
-On Create
-![Screenshot_1692377836](https://github.com/JonathanAmirSalinas/todo_app/assets/126116839/545f8b8c-05ca-4dc7-b01f-f87939e803a9)
+
+
 
 Example UI
 ![Screenshot_1692378960](https://github.com/JonathanAmirSalinas/todo_app/assets/126116839/b2db7899-eeaa-4470-9eff-327405f1c1cf)
